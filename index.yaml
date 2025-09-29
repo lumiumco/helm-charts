@@ -1,0 +1,25 @@
+apiVersion: v1
+entries:
+  ratelimit:
+  - apiVersion: v2
+    appVersion: 623341ab
+    created: "2025-09-29T22:49:55.167765577Z"
+    description: A rate limit service Helm chart for Kubernetes
+    digest: abd9302f1acb6d3d5488f4303fbf3cd8337d9cb567f516476eafa0a0543ee702
+    name: ratelimit
+    type: application
+    urls:
+    - https://github.com/lumiumco/helm-charts/releases/download/ratelimit-0.0.2/ratelimit-0.0.2.tgz
+    version: 0.0.2
+  service:
+  - apiVersion: v2
+    appVersion: 0.0.1
+    created: "2025-09-29T22:49:55.340789333Z"
+    description: A Helm chart for Kubernetes
+    digest: 5749ee7420abbeb0839a28490042735a9d068969eb7473343f609943d0cf5091
+    name: service
+    type: application
+    urls:
+    - https://github.com/lumiumco/helm-charts/releases/download/service-0.0.2/service-0.0.2.tgz
+    version: 0.0.2
+generated: "2025-09-29T22:49:55.340794322Z"
