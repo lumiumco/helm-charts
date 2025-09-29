@@ -1,0 +1,50 @@
+{{- if .Values.redis.enabled }}
+{{- $image := .Values.redis.image }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.redis.service.name }}
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: {{ .Values.redis.service.name }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ .Values.redis.service.name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.redis.service.name }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: redis
+          {{- with .Values.securityContext }}
+          securityContext:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          image: "{{ .Values.redis.image.repository }}:{{ .Values.redis.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - containerPort: {{ .Values.redis.service.port }}
+          env:
+            - name: MASTER
+              value: "true"
+          volumeMounts:
+            - mountPath: /redis-master-data
+              name: data
+          resources:
+            limits:
+              cpu: 250m
+              memory: 512Mi
+            requests:
+              cpu: 125m
+              memory: 256Mi
+      volumes:
+        - name: data
+          emptyDir: { }
+{{- end }}

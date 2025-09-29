@@ -1,0 +1,6 @@
+apiVersion: v2
+name: ratelimit
+description: A rate limit service Helm chart for Kubernetes
+type: application
+version: 0.0.1
+appVersion: "623341ab"

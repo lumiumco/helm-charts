@@ -1,0 +1,126 @@
+# Default values for ratelimit.
+replicaCount: 1
+
+image:
+  repository: envoyproxy/ratelimit
+  pullPolicy: IfNotPresent
+  tag: "a90e0e5d"
+
+imagePullSecrets: []
+
+nameOverride: "ratelimit"
+fullnameOverride: "ratelimit"
+
+serviceAccount:
+  create: true
+  automount: true
+  annotations: {}
+  name: ""
+
+podAnnotations:
+  prometheus.io/scrape: "true"
+podLabels: {}
+podSecurityContext: {}
+securityContext: {}
+
+service:
+  type: ClusterIP
+  port: 80
+
+ingress:
+  enabled: false
+  className: ""
+  annotations: {}
+  hosts:
+    - host: chart-example.local
+      paths:
+        - path: /
+          pathType: ImplementationSpecific
+  tls: []
+
+resources: {}
+
+livenessProbe:
+  httpGet:
+    path: /healthcheck
+    port: http
+readinessProbe:
+  httpGet:
+    path: /healthcheck
+    port: http
+
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 100
+  targetCPUUtilizationPercentage: 80
+  targetMemoryUtilizationPercentage: 80
+
+volumes:
+  - name: ratelimit-config-volume
+    projected:
+      defaultMode: 420
+      sources:
+        - configMap:
+            name: light-rate-limit
+  - name: prometheus-config-volume
+    projected:
+      defaultMode: 420
+      sources:
+        - configMap:
+            name: prometheus-mapper
+
+volumeMounts:
+  - name: ratelimit-config-volume
+    mountPath: /data/ratelimit/config
+  - name: prometheus-config-volume
+    mountPath: /data/prometheus/config
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
+
+namespace: istio-system
+
+ratelimit:
+  ports:
+    debug:
+      name: debug
+      port: 6070
+    grpc:
+      name: grpc
+      port: 8081
+    http:
+      name: http
+      port: 8080
+    prometheus:
+      name: http
+      port: 9090
+  logLevel: warn
+  useStatsd: false
+  usePrometheus: true
+  prometheusMapperYaml: /data/prometheus/config/prometheus-mapper.yaml
+  runtimeRoot: /data
+  runtimeSubdirectory: ratelimit
+  runtimeWatchRoot: false
+  runtimeIgnoredotfiles: true
+  mergeDomainConfig: true
+
+domain: api
+failureModeDeny: false
+timeout: 0.100s
+headers: DRAFT_VERSION_03
+rateLimitService: ratelimit.istio-system.svc.cluster.local
+
+redis:
+  enabled: true
+  image:
+    pullPolicy: IfNotPresent
+    repository: redis
+    tag: alpine
+  service:
+    port: 6379
+    name: ratelimit-redis
+    socket: tcp

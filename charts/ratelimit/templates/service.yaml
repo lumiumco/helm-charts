@@ -1,0 +1,24 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "ratelimit.fullname" . }}
+  namespace: {{ .Values.namespace }}
+  labels:
+    {{- include "ratelimit.labels" . | nindent 4 }}
+spec:
+  type: {{ .Values.service.type }}
+  ports:
+    - port: {{ .Values.ratelimit.ports.debug.port }}
+      targetPort: {{ .Values.ratelimit.ports.debug.name }}
+      protocol: TCP
+      name: {{ .Values.ratelimit.ports.debug.name }}
+    - port: {{ .Values.ratelimit.ports.grpc.port }}
+      targetPort: {{ .Values.ratelimit.ports.grpc.name }}
+      protocol: TCP
+      name: {{ .Values.ratelimit.ports.grpc.name }}
+    - port: {{ .Values.ratelimit.ports.http.port }}
+      targetPort: {{ .Values.ratelimit.ports.http.name }}
+      protocol: TCP
+      name: {{ .Values.ratelimit.ports.http.name }}
+  selector:
+    {{- include "ratelimit.selectorLabels" . | nindent 4 }}

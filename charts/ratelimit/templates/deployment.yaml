@@ -1,0 +1,114 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "ratelimit.fullname" . }}
+  namespace: {{ .Values.namespace }}
+  labels:
+    {{- include "ratelimit.labels" . | nindent 4 }}
+spec:
+  {{- if not .Values.autoscaling.enabled }}
+  replicas: {{ .Values.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "ratelimit.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "ratelimit.labels" . | nindent 8 }}
+        {{- with .Values.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "ratelimit.serviceAccountName" . }}
+      {{- with .Values.podSecurityContext }}
+      securityContext:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: {{ .Chart.Name }}
+          {{- with .Values.securityContext }}
+          securityContext:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          command:
+            - /bin/ratelimit
+          ports:
+            - name: debug
+              containerPort: {{ .Values.ratelimit.ports.debug.port }}
+            - name: grpc
+              containerPort: {{ .Values.ratelimit.ports.grpc.port }}
+            - name: http
+              containerPort: {{ .Values.ratelimit.ports.http.port }}
+            - name: prometheus
+              containerPort: {{ .Values.ratelimit.ports.prometheus.port }}
+          env:
+            - name: LOG_LEVEL
+              value: {{ .Values.ratelimit.logLevel }}
+            {{- if .Values.redis.enabled }}
+            - name: REDIS_SOCKET_TYPE
+              value: {{ .Values.redis.service.socket }}
+            - name: REDIS_URL
+              value: {{ .Values.redis.service.name }}:{{ .Values.redis.service.port }}
+            {{- end }}
+            - name: USE_STATSD
+              value: {{ .Values.ratelimit.useStatsd | quote }}
+            - name: USE_PROMETHEUS
+              value: {{ .Values.ratelimit.usePrometheus | quote }}
+            - name: PROMETHEUS_ADDR
+              value: {{ .Values.ratelimit.prometheusAddr }}
+            - name: PROMETHEUS_MAPPER_YAML
+              value: {{ .Values.ratelimit.prometheusMapperYaml }}
+
+            - name: RUNTIME_ROOT
+              value: {{ .Values.ratelimit.runtimeRoot }}
+            - name: RUNTIME_SUBDIRECTORY
+              value: {{ .Values.ratelimit.runtimeSubdirectory }}
+            - name: RUNTIME_WATCH_ROOT
+              value: {{ .Values.ratelimit.runtimeWatchRoot | quote }}
+            - name: RUNTIME_IGNOREDOTFILES
+              value: {{ .Values.ratelimit.runtimeIgnoredotfiles | quote }}
+            - name: MERGE_DOMAIN_CONFIG
+              value: {{ .Values.ratelimit.mergeDomainConfig | quote }}
+          {{- with .Values.livenessProbe }}
+          livenessProbe:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.readinessProbe }}
+          readinessProbe:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.volumeMounts }}
+          volumeMounts:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+      {{- with .Values.volumes }}
+      volumes:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
