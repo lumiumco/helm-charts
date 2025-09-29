@@ -1,1 +1,3 @@
 # Helm charts
+- ratelimit
+- service
