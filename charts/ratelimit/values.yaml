@@ -19,7 +19,8 @@ serviceAccount:
 
 podAnnotations:
   prometheus.io/scrape: "true"
-podLabels: {}
+podLabels:
+  app: ratelimit
 podSecurityContext: {}
 securityContext: {}
 
@@ -29,14 +30,6 @@ service:
 
 ingress:
   enabled: false
-  className: ""
-  annotations: {}
-  hosts:
-    - host: chart-example.local
-      paths:
-        - path: /
-          pathType: ImplementationSpecific
-  tls: []
 
 resources: {}
 
@@ -62,7 +55,8 @@ volumes:
       defaultMode: 420
       sources:
         - configMap:
-            name: light-rate-limit
+            name: ratelimit-config
+            optional: true
   - name: prometheus-config-volume
     projected:
       defaultMode: 420
