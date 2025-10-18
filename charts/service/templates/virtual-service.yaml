@@ -14,5 +14,5 @@ spec:
             prefix: {{ .Values.virtualService.prefix | quote }}
       route:
         - destination:
-            host: {{ printf "%s.%s.svc.cluster.local" .Values.virtualService.serviceName .Release.Namespace }}
+            host: {{ printf "%s.%s.svc.cluster.local" .Values.serviceAccount.name .Release.Namespace }}
 {{- end }}
