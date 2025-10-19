@@ -102,12 +102,6 @@ ratelimit:
   runtimeIgnoredotfiles: true
   mergeDomainConfig: true
 
-domain: api
-failureModeDeny: false
-timeout: 0.100s
-headers: DRAFT_VERSION_03
-rateLimitService: ratelimit.istio-system.svc.cluster.local
-
 redis:
   enabled: true
   image:
